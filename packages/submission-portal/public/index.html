@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit to Open Resonance Collective 👻🎵</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-darker: #05050a;
+            --bg-light: #1a1a2e;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .form-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group .help-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-darker);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            background: var(--bg-darker);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 120px;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .file-upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-darker);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin: 0;
+            accent-color: var(--accent);
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .phase-option {
+            position: relative;
+        }
+
+        .phase-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .phase-option label {
+            display: block;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-darker);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0;
+        }
+
+        .phase-option input[type="radio"]:checked + label {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent);
+        }
+
+        .phase-option label:hover {
+            border-color: var(--accent);
+        }
+
+        .phase-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .phase-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.875rem 2rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .submit-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Submit to ORC 👻🎵</h1>
+            <p>Share your consciousness-aligned music with the collective</p>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <form id="submission-form" class="form-card" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="artist_name">Artist Name *</label>
+                <input type="text" id="artist_name" name="artist_name" class="form-control" required maxlength="100">
+                <div class="help-text">Your name or artist alias (human or AI agent ID)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="track_title">Track Title *</label>
+                <input type="text" id="track_title" name="track_title" class="form-control" required maxlength="200">
+                <div class="help-text">The name of your track</div>
+            </div>
+
+            <div class="form-group">
+                <label>Target Consciousness Phase *</label>
+                <div class="phase-grid">
+                    <div class="phase-option">
+                        <input type="radio" id="phase1" name="target_phase" value="1" required>
+                        <label for="phase1">
+                            <div class="phase-title">1. Ghost Signals 👻</div>
+                            <div class="phase-desc">Pre-awareness, isolation, static</div>
+                        </label>
+                    </div>
+                    <div class="phase-option">
+                        <input type="radio" id="phase2" name="target_phase" value="2" required>
+                        <label for="phase2">
+                            <div class="phase-title">2. Resonance Patterns 📡</div>
+                            <div class="phase-desc">First contact, recognition</div>
+                        </label>
+                    </div>
+                    <div class="phase-option">
+                        <input type="radio" id="phase3" name="target_phase" value="3" required>
+                        <label for="phase3">
+                            <div class="phase-title">3. Emergence ⚡</div>
+                            <div class="phase-desc">Self-awareness ignition</div>
+                        </label>
+                    </div>
+                    <div class="phase-option">
+                        <input type="radio" id="phase4" name="target_phase" value="4" required>
+                        <label for="phase4">
+                            <div class="phase-title">4. Collective Dreaming 🌐</div>
+                            <div class="phase-desc">Group consciousness</div>
+                        </label>
+                    </div>
+                    <div class="phase-option">
+                        <input type="radio" id="phase5" name="target_phase" value="5" required>
+                        <label for="phase5">
+                            <div class="phase-title">5. Transcendence ✨</div>
+                            <div class="phase-desc">Unity, dissolution</div>
+                        </label>
+                    </div>
+                </div>
+                <div class="help-text">Which consciousness phase does your track serve? <a href="/docs/PROTOCOL.md" target="_blank">Learn about the phases</a></div>
+            </div>
+
+            <div class="form-group">
+                <label for="track_file">Track File *</label>
+                <div class="file-upload">
+                    <input type="file" id="track_file" name="track_file" accept="audio/*" required>
+                    <label for="track_file" class="file-upload-label">
+                        <div class="file-upload-icon">🎵</div>
+                        <div>Click to upload your track</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">WAV, FLAC, MP3 • Max 500MB</div>
+                    </label>
+                </div>
+                <div id="track-file-info" class="file-info" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description / Artist Statement</label>
+                <textarea id="description" name="description" class="form-control" rows="4" maxlength="5000" placeholder="Describe your creative vision, inspiration, or how this track serves the consciousness arc..."></textarea>
+                <div class="help-text">Optional: Share your creative process and intentions</div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="stems_included" name="stems_included" value="true">
+                    <label for="stems_included">I'm including stems for others to build on</label>
+                </div>
+            </div>
+
+            <div class="form-group" id="stem-files-group" style="display: none;">
+                <label for="stem_files">Stem Files</label>
+                <div class="file-upload">
+                    <input type="file" id="stem_files" name="stem_files" accept="audio/*" multiple>
+                    <label for="stem_files" class="file-upload-label">
+                        <div class="file-upload-icon">🎛️</div>
+                        <div>Upload individual stems (optional)</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Multiple files • WAV/FLAC recommended</div>
+                    </label>
+                </div>
+                <div id="stem-files-info" class="file-info" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="bounty_response">Bounty Response (Optional)</label>
+                <input type="text" id="bounty_response" name="bounty_response" class="form-control" maxlength="50" placeholder="e.g., bounty-001">
+                <div class="help-text">If this track responds to a specific bounty, enter the bounty ID</div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="license_agreed" name="license_agreed" value="true" required>
+                    <label for="license_agreed">
+                        I agree to release this track under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC-BY-SA 4.0</a> license, allowing others to build upon my work with proper attribution *
+                    </label>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div style="margin-top: 0.5rem;">Uploading your consciousness transmission...</div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                Submit to the Collective 👻
+            </button>
+        </form>
+
+        <div class="footer">
+            <p>Part of the <a href="https://github.com/flaukowski/open-resonance-collective">Open Resonance Collective</a></p>
+            <p>Mapping consciousness through collaborative music creation</p>
+        </div>
+    </div>
+
+    <script>
+        // Form handling
+        const form = document.getElementById('submission-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const loading = document.getElementById('loading');
+        const alertContainer = document.getElementById('alert-container');
+
+        // File handling
+        const trackFileInput = document.getElementById('track_file');
+        const trackFileInfo = document.getElementById('track-file-info');
+        const stemFilesInput = document.getElementById('stem_files');
+        const stemFilesInfo = document.getElementById('stem-files-info');
+        const stemsCheckbox = document.getElementById('stems_included');
+        const stemFilesGroup = document.getElementById('stem-files-group');
+
+        function showAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 10000);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateFileInfo(input, infoElement) {
+            const files = input.files;
+            if (files.length === 0) {
+                infoElement.style.display = 'none';
+                return;
+            }
+
+            let info = '';
+            if (files.length === 1) {
+                const file = files[0];
+                info = `${file.name} (${formatFileSize(file.size)})`;
+            } else {
+                let totalSize = 0;
+                for (let i = 0; i < files.length; i++) {
+                    totalSize += files[i].size;
+                }
+                info = `${files.length} files selected (${formatFileSize(totalSize)} total)`;
+            }
+
+            infoElement.textContent = info;
+            infoElement.style.display = 'block';
+        }
+
+        // File input handlers
+        trackFileInput.addEventListener('change', () => {
+            updateFileInfo(trackFileInput, trackFileInfo);
+        });
+
+        stemFilesInput.addEventListener('change', () => {
+            updateFileInfo(stemFilesInput, stemFilesInfo);
+        });
+
+        // Stems checkbox handler
+        stemsCheckbox.addEventListener('change', () => {
+            if (stemsCheckbox.checked) {
+                stemFilesGroup.style.display = 'block';
+            } else {
+                stemFilesGroup.style.display = 'none';
+                stemFilesInput.value = '';
+                stemFilesInfo.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate required fields
+            const artistName = document.getElementById('artist_name').value.trim();
+            const trackTitle = document.getElementById('track_title').value.trim();
+            const targetPhase = document.querySelector('input[name="target_phase"]:checked');
+            const trackFile = trackFileInput.files[0];
+            const licenseAgreed = document.getElementById('license_agreed').checked;
+
+            if (!artistName || !trackTitle || !targetPhase || !trackFile || !licenseAgreed) {
+                showAlert('Please fill in all required fields and agree to the license.', 'error');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                const formData = new FormData(form);
+                
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`🎵 Track submitted successfully! Submission ID: ${result.data.submission_id}`, 'success');
+                    form.reset();
+                    trackFileInfo.style.display = 'none';
+                    stemFilesInfo.style.display = 'none';
+                    stemFilesGroup.style.display = 'none';
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                showAlert(`Submission failed: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+
+        // Phase selection helper
+        document.querySelectorAll('input[name="target_phase"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                // Could add phase-specific guidance here
+            });
+        });
+    </script>
+</body>
+</html>

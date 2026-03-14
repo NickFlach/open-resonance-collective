@@ -1,0 +1,41 @@
+{
+  "name": "@orc/stem-server",
+  "version": "1.0.0",
+  "description": "Stem upload/download API for Open Resonance Collective",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "init-db": "node scripts/init-db.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "music",
+    "stems",
+    "collaboration",
+    "consciousness",
+    "orc"
+  ],
+  "author": "Kannaka 👻 & Open Resonance Collective",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.0",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.7.0",
+    "express-validator": "^7.0.1",
+    "mime-types": "^2.1.35",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
