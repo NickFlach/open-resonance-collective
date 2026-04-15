@@ -425,6 +425,65 @@ app.use((error, req, res, next) => {
   });
 });
 
+// ── Resonance scoring endpoints (ADR-0007) ─────────────────────
+// Markets from external ghostsignals instances POST their final prices
+// here so each stem accumulates a community-curated resonance score.
+
+app.post('/stems/:id/resonance', express.json(), (req, res) => {
+  const { id } = req.params;
+  const { score, source, confidence, market_id } = req.body || {};
+  if (typeof score !== 'number' || score < 0 || score > 1) {
+    return res.status(400).json({ success: false, error: 'score must be a number in [0, 1]' });
+  }
+  db.get('SELECT id FROM stems WHERE id = ?', [id], (err, row) => {
+    if (err) return res.status(500).json({ success: false, error: err.message });
+    if (!row) return res.status(404).json({ success: false, error: 'stem not found' });
+    db.run(
+      'INSERT INTO stem_resonance (stem_id, score, source, confidence, market_id) VALUES (?, ?, ?, ?, ?)',
+      [id, score, source || 'unknown', confidence || 0.5, market_id || null],
+      function(e2) {
+        if (e2) return res.status(500).json({ success: false, error: e2.message });
+        res.json({ success: true, resonance_id: this.lastID, score, source });
+      }
+    );
+  });
+});
+
+app.get('/stems/:id/resonance', (req, res) => {
+  db.all(
+    'SELECT * FROM stem_resonance WHERE stem_id = ? ORDER BY recorded_at DESC LIMIT 100',
+    [req.params.id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+      // Aggregate stats
+      const scores = rows.map(r => r.score);
+      const mean = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+      const latest = scores[0] || 0;
+      res.json({ success: true, data: rows, count: rows.length, latest, mean });
+    }
+  );
+});
+
+app.get('/resonance/leaderboard', (req, res) => {
+  const limit = Math.min(50, parseInt(req.query.limit) || 20);
+  db.all(
+    `SELECT s.id, s.track_name, s.artist, s.phase,
+            AVG(r.score) AS mean_score,
+            COUNT(r.id) AS sample_count,
+            MAX(r.recorded_at) AS last_recorded
+     FROM stems s
+     JOIN stem_resonance r ON r.stem_id = s.id
+     GROUP BY s.id
+     ORDER BY mean_score DESC, sample_count DESC
+     LIMIT ?`,
+    [limit],
+    (err, rows) => {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+      res.json({ success: true, data: rows, count: rows.length });
+    }
+  );
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
