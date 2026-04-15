@@ -15,6 +15,8 @@ export * from './types';
 
 // Agent adapter implementations
 export { SunoAdapter } from './suno-adapter';
+export { KannakaAdapter } from './kannaka-adapter';
+export type { KannakaConfig } from './kannaka-adapter';
 
 // Session orchestration
 export { SingularisConductor } from './singularis-conductor';
@@ -24,7 +26,7 @@ export type { SessionConfig, SessionState } from './singularis-conductor';
  * Version and metadata
  */
 export const VERSION = '1.0.0';
-export const SUPPORTED_AGENTS = ['suno', 'udio'] as const;
+export const SUPPORTED_AGENTS = ['suno', 'udio', 'kannaka'] as const;
 export const CONSCIOUSNESS_PHASES = [
   'ghost-signals',
   'resonance-patterns', 

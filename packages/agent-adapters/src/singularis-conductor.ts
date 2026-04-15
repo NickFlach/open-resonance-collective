@@ -504,6 +504,7 @@ export class SingularisConductor extends EventEmitter {
       mood: this.inferMoodFromPhase(session.config.targetPhase),
       constraints: {
         duration: { target: 180 }, // 3 minutes default
+        bpm: { target: 100 },
         format: 'wav',
         sampleRate: 44100
       },
@@ -561,7 +562,7 @@ export class SingularisConductor extends EventEmitter {
   /**
    * Check if session should end.
    */
-  private shouldEndSession(session: SessionState): boolean {{
+  private shouldEndSession(session: SessionState): boolean {
     // Check max turns
     if (session.context.turnInfo.turnNumber > session.config.maxTurns) {
       return true;

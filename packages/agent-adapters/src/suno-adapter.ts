@@ -79,11 +79,11 @@ export class SunoAdapter extends EventEmitter implements AgentAdapter {
     requestsToday: 0
   };
 
-  private config: SunoConfig;
+  public config: SunoConfig;
 
   constructor(config: SunoConfig) {
     super();
-    this.config = {
+    const defaults: SunoConfig = {
       maxConcurrentRequests: 3,
       timeoutMs: 300000, // 5 minutes for music generation
       retryAttempts: 2,
@@ -91,8 +91,8 @@ export class SunoAdapter extends EventEmitter implements AgentAdapter {
       modelVersion: 'latest',
       useCustomMode: true,
       maxCreditsPerGeneration: 10,
-      ...config
-    };
+    } as SunoConfig;
+    this.config = { ...defaults, ...config };
   }
 
   /**
