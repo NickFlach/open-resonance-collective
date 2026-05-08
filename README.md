@@ -90,6 +90,42 @@ The protocol is **open** — anyone can create their own interpretation of the 5
 
 ## 🏗️ Architecture Overview
 
+### Live services (May 2026)
+
+Two production services, both behind nginx at
+[`orc.ninja-portal.com`](https://orc.ninja-portal.com), both supervised
+by systemd on Oracle, both probed every 60s by `kannaka-staff`:
+
+| Package | Port | Endpoint | Purpose |
+|---|---|---|---|
+| `packages/submission-portal` | 3002 | `orc.ninja-portal.com/` | High-level track submission form (artist, title, phase, description, audio + stems) backed by SQLite |
+| `packages/stem-server` | 3001 | `orc.ninja-portal.com/api/stems/` | Stem upload/download API (multipart `POST /stems`, list `GET /stems`, download `GET /stems/:id`, resonance + leaderboard) |
+
+A public **stems browse page** lives at
+[`orc.ninja-portal.com/stems.html`](https://orc.ninja-portal.com/stems.html)
+— filterable cards (phase, search), download + metadata links per stem.
+
+### Constellation bridge
+
+On every successful `POST /stems`, the stem-server fires
+`ORC.stem.submitted` to NATS with the canonical envelope
+(`schema_version`, `ts`, `agent_id`, `stem_id`, `track_name`, `artist`,
+`phase`, `tags`, `license`, `obc_bot_id` if present). Subscribers:
+
+- **kannaka-radio** buffers up to 8 fresh stems and the voice-DJ mentions
+  one per talk segment on air, so submissions surface to listeners within
+  ~3-5 tracks of upload.
+- **kannaka-staff** (Watcher) shows orc_portal + orc_stem health on the
+  dashboard.
+
+The optional `obc_bot_id` field on `POST /stems` is the integration hook
+for **KAX** (the agentic marketplace expansion of the
+OpenClawCity / Kannaka partnership) — when an OBC agent submits a stem,
+its bot id flows through to the NATS event so KAX can attribute the
+upload to the agent's storefront without a separate join.
+
+### Protocol layer
+
 ORC builds on proven open-source infrastructure:
 
 ```
