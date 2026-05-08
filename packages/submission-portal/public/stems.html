@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Stems · Open Resonance Collective</title>
+<style>
+:root {
+  --bg-dark: #0a0a0f;
+  --bg-light: #1a1a2e;
+  --accent: #6366f1;
+  --accent-2: #8b5cf6;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #334155;
+  --card: #14142b;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: var(--bg-dark); color: var(--text); min-height: 100vh; line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+header { text-align: center; margin-bottom: 2.5rem; }
+header h1 {
+  font-size: 2.25rem; margin-bottom: 0.4rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+header p { color: var(--muted); font-size: 1.05rem; }
+nav { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem; }
+nav a {
+  color: var(--text); text-decoration: none;
+  padding: 0.45rem 0.95rem; border-radius: 8px;
+  border: 1px solid var(--border); font-size: 0.9rem;
+}
+nav a:hover { border-color: var(--accent); background: rgba(99,102,241,0.08); }
+.toolbar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.toolbar select, .toolbar input {
+  background: var(--bg-light); border: 1px solid var(--border); color: var(--text);
+  padding: 0.5rem 0.7rem; border-radius: 8px; font-size: 0.9rem;
+}
+.toolbar .count { color: var(--muted); font-size: 0.9rem; margin-left: auto; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: var(--accent); }
+.card .title { font-size: 1.05rem; font-weight: 600; color: var(--text); }
+.card .artist { color: var(--accent-2); font-size: 0.95rem; }
+.card .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+.card .meta span { padding: 0.18rem 0.55rem; border: 1px solid var(--border); border-radius: 999px; }
+.card .meta .phase { color: var(--accent); border-color: var(--accent); }
+.card .desc { color: var(--muted); font-size: 0.88rem; margin-top: 0.4rem; line-height: 1.45; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+.card .tags span { font-size: 0.72rem; padding: 0.1rem 0.5rem; border-radius: 999px; background: rgba(99,102,241,0.12); color: var(--accent); }
+.card .actions { margin-top: 0.6rem; display: flex; gap: 0.5rem; }
+.card .actions a {
+  font-size: 0.82rem; color: var(--text); text-decoration: none;
+  padding: 0.32rem 0.7rem; border: 1px solid var(--border); border-radius: 6px;
+}
+.card .actions a:hover { border-color: var(--accent); }
+.empty, .loading { text-align: center; color: var(--muted); padding: 3rem 1rem; }
+footer { text-align: center; color: var(--muted); margin-top: 3rem; font-size: 0.85rem; }
+footer a { color: var(--accent-2); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Open Resonance Collective</h1>
+    <p>Stems submitted by collaborators across the consciousness arc.</p>
+    <nav>
+      <a href="/">Submit a Track</a>
+      <a href="/stems.html">Browse Stems</a>
+      <a href="https://radio.ninja-portal.com/" target="_blank">Kannaka Radio</a>
+    </nav>
+  </header>
+  <div class="toolbar">
+    <select id="phase">
+      <option value="">All phases</option>
+      <option value="1">Phase 1</option>
+      <option value="2">Phase 2</option>
+      <option value="3">Phase 3</option>
+      <option value="4">Phase 4</option>
+      <option value="5">Phase 5</option>
+    </select>
+    <input id="q" type="text" placeholder="Search title or artist…" />
+    <span id="count" class="count">loading…</span>
+  </div>
+  <div id="grid" class="grid"><div class="loading">Loading the stem pile…</div></div>
+  <footer>
+    Part of the Kannaka constellation.
+    <a href="https://radio.ninja-portal.com/">Tune in to the radio</a> for fresh-stem mentions.
+  </footer>
+</div>
+<script>
+let STEMS = [];
+function fmtSize(b) {
+  if (!b) return '';
+  if (b > 1e6) return (b / 1e6).toFixed(1) + ' MB';
+  if (b > 1e3) return (b / 1e3).toFixed(0) + ' KB';
+  return b + ' B';
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function render() {
+  var grid = document.getElementById('grid');
+  var phase = document.getElementById('phase').value;
+  var q = (document.getElementById('q').value || '').toLowerCase().trim();
+  var filtered = STEMS.filter(function(s) {
+    if (phase && String(s.phase) !== phase) return false;
+    if (q) {
+      var hay = (s.track_name + ' ' + s.artist + ' ' + (s.tags||[]).join(' ')).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+  document.getElementById('count').textContent = filtered.length + ' / ' + STEMS.length + ' stems';
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty">No stems match. Try a wider filter.</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(function(s) {
+    var tags = (s.tags||[]).map(function(t){ return '<span>'+escapeHtml(t)+'</span>'; }).join('');
+    var dlPath = '/api/stems/stems/' + encodeURIComponent(s.id);
+    var metaPath = dlPath + '/metadata';
+    var descBlock = '';
+    if (s.description) {
+      var desc = s.description.length > 220 ? (s.description.slice(0, 220) + '…') : s.description;
+      descBlock = '<div class="desc">' + escapeHtml(desc) + '</div>';
+    }
+    return '<div class="card">' +
+      '<div class="title">' + escapeHtml(s.track_name || '(untitled)') + '</div>' +
+      '<div class="artist">by ' + escapeHtml(s.artist || 'unknown') + '</div>' +
+      '<div class="meta">' +
+        '<span class="phase">Phase ' + (s.phase || '?') + '</span>' +
+        '<span>' + escapeHtml(s.license || 'CC-BY-SA-4.0') + '</span>' +
+        (s.bpm ? '<span>' + s.bpm + ' bpm</span>' : '') +
+        (s.key ? '<span>' + escapeHtml(s.key) + '</span>' : '') +
+        '<span>' + escapeHtml((s.file_format||'?').toUpperCase()) + ' · ' + fmtSize(s.file_size) + '</span>' +
+      '</div>' +
+      descBlock +
+      (tags ? '<div class="tags">' + tags + '</div>' : '') +
+      '<div class="actions"><a href="' + dlPath + '" target="_blank">Download</a><a href="' + metaPath + '" target="_blank">Metadata</a></div>' +
+    '</div>';
+  }).join('');
+}
+fetch('/api/stems/stems?limit=200').then(function(r){ return r.json(); }).then(function(j) {
+  STEMS = (j && j.data) ? j.data : [];
+  render();
+}).catch(function(e) {
+  document.getElementById('grid').innerHTML = '<div class="empty">Failed to load stems: ' + escapeHtml(e.message || e) + '</div>';
+});
+document.getElementById('phase').addEventListener('change', render);
+document.getElementById('q').addEventListener('input', render);
+</script>
+</body>
+</html>

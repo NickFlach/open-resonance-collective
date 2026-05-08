@@ -85,6 +85,10 @@ const validateStemUpload = [
   body('key').optional().isLength({ max: 10 }).withMessage('Key too long'),
   body('parent_stem_id').optional().isUUID().withMessage('Invalid parent stem ID'),
   body('uploaded_by').notEmpty().isLength({ min: 1, max: 100 }).withMessage('Uploader name required'),
+  // KAX integration: optional OBC bot identity. When present, the
+  // ORC.stem.submitted NATS event carries it so KAX can attribute the
+  // upload to the agent's storefront without a separate join step.
+  body('obc_bot_id').optional().isUUID().withMessage('Invalid OBC bot ID (must be UUID)'),
   body('tags').optional().isArray().withMessage('Tags must be an array'),
   body('tags.*').isLength({ min: 1, max: 50 }).withMessage('Each tag must be 1-50 chars')
 ];
@@ -138,6 +142,7 @@ app.post('/stems', uploadLimiter, upload.single('audio'), validateStemUpload, ha
     key,
     parent_stem_id,
     uploaded_by,
+    obc_bot_id,
     tags = []
   } = req.body;
 
@@ -206,6 +211,7 @@ app.post('/stems', uploadLimiter, upload.single('audio'), validateStemUpload, ha
         license: license || null,
         tags: Array.isArray(tags) ? tags : [],
         uploaded_by: uploaded_by || null,
+        obc_bot_id: obc_bot_id || null,
         file_format: fileInfo.file_format || null,
         file_size: fileInfo.file_size || 0,
       });
