@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit');
 const { body, param, query, validationResult } = require('express-validator');
 const mime = require('mime-types');
 const morgan = require('morgan');
+const nats = require('./nats-publish');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -190,6 +191,25 @@ app.post('/stems', uploadLimiter, upload.single('audio'), validateStemUpload, ha
         message: 'Stem uploaded successfully'
       }
     });
+
+    // Fire-and-forget constellation notification — kannaka-radio subscribes
+    // to ORC.stem.submitted and surfaces fresh stems in the on-air patter.
+    try {
+      nats.publish('ORC.stem.submitted', {
+        schema_version: '1',
+        ts: new Date().toISOString(),
+        agent_id: 'orc-stem-server',
+        stem_id: stemId,
+        track_name: track_name || null,
+        artist: artist || null,
+        phase: phase || null,
+        license: license || null,
+        tags: Array.isArray(tags) ? tags : [],
+        uploaded_by: uploaded_by || null,
+        file_format: fileInfo.file_format || null,
+        file_size: fileInfo.file_size || 0,
+      });
+    } catch (_) { /* best-effort; SQLite is the source of truth */ }
   });
 
   stmt.finalize();
