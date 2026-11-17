@@ -52,7 +52,9 @@ const storage = multer.diskStorage({
     cb(null, stemsDir);
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}_${file.originalname}`;
+    // Basename and a safe alphabet: the client's filename never chooses a directory.
+    const safe = path.basename(String(file.originalname || '')).replace(/[^a-zA-Z0-9.-]/g, '_').replace(/^\.+/, '') || 'stem';
+    const uniqueName = `${uuidv4()}_${safe}`;
     cb(null, uniqueName);
   }
 });
@@ -66,7 +68,8 @@ const upload = multer({
     const allowedFormats = ['audio/wav', 'audio/x-wav', 'audio/flac', 'audio/x-flac', 'audio/aiff', 'audio/x-aiff'];
     const mimeType = mime.lookup(file.originalname);
     
-    if (allowedFormats.includes(file.mimetype) || allowedFormats.includes(mimeType)) {
+    // The extension decides; the claimed Content-Type is the client's word.
+    if (['.wav', '.flac', '.aiff', '.aif'].includes(path.extname(String(file.originalname || '')).toLowerCase())) {
       cb(null, true);
     } else {
       cb(new Error('Only WAV, FLAC, and AIFF files are allowed'), false);
