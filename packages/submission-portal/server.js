@@ -53,11 +53,29 @@ if (!fs.existsSync(submissionsDir)) {
   fs.mkdirSync(submissionsDir, { recursive: true });
 }
 
+// Audio extensions an upload may be stored under. The claimed Content-Type is
+// the client's word and is not evidence of anything.
+const AUDIO_EXTENSIONS = ['.wav', '.flac', '.mp3', '.aiff', '.aif'];
+
+// A stored name is a basename with a safe alphabet and no leading dot.
+function safeUploadName(originalname) {
+  const base = path.basename(String(originalname || '')).replace(/[^a-zA-Z0-9.-]/g, '_').replace(/^\.+/, '');
+  return base || 'upload';
+}
+
+function hasAudioExtension(originalname) {
+  return AUDIO_EXTENSIONS.includes(path.extname(String(originalname || '')).toLowerCase());
+}
+
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const submissionId = req.body.submission_id || uuidv4();
-    const submissionDir = path.join(submissionsDir, submissionId);
+    // The directory name is ours, never the client's. A client-chosen
+    // submission_id went straight into path.join, so "../../x" (or an absolute
+    // path) put an upload anywhere the service user could write. One id per
+    // request, so the track and its stems share a directory.
+    if (!req.orcSubmissionId) req.orcSubmissionId = uuidv4();
+    const submissionDir = path.join(submissionsDir, req.orcSubmissionId);
     
     if (!fs.existsSync(submissionDir)) {
       fs.mkdirSync(submissionDir, { recursive: true });
@@ -67,8 +85,7 @@ const storage = multer.diskStorage({
     cb(null, submissionDir);
   },
   filename: (req, file, cb) => {
-    const cleanName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-    cb(null, cleanName);
+    cb(null, safeUploadName(file.originalname));
   }
 });
 
@@ -88,7 +105,7 @@ const upload = multer({
     
     const mimeType = mime.lookup(file.originalname);
     
-    if (allowedAudioFormats.includes(file.mimetype) || allowedAudioFormats.includes(mimeType)) {
+    if (hasAudioExtension(file.originalname)) {
       cb(null, true);
     } else {
       cb(new Error(`Invalid file type: ${file.originalname}. Only audio files allowed.`), false);
@@ -177,7 +194,7 @@ app.post('/api/submit',
       });
     }
 
-    const submissionId = uuidv4();
+    const submissionId = req.orcSubmissionId || uuidv4();
     const trackFile = req.files.track_file[0];
     const stemFiles = req.files.stem_files || [];
 
